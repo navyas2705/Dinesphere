@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DineSphere | Restaurant Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- ============ HEADER + TABS ============ -->
+    <header class="bg-slate-900 text-white shadow">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h1 class="text-xl font-bold">🍽️ Dine<span class="text-orange-500">Sphere</span></h1>
+                <p class="text-xs text-slate-400">Restaurant Management System</p>
+            </div>
+            <nav class="flex flex-wrap gap-1">
+                <button onclick="switchTab('pos')"       id="tabBtn-pos"       class="tab-btn active">POS</button>
+                <button onclick="switchTab('orders')"    id="tabBtn-orders"    class="tab-btn">Orders</button>
+                <button onclick="switchTab('menu')"      id="tabBtn-menu"      class="tab-btn">Menu</button>
+                <button onclick="switchTab('customers')" id="tabBtn-customers" class="tab-btn">Customers</button>
+                <button onclick="switchTab('analytics')" id="tabBtn-analytics" class="tab-btn">Analytics</button>
+                <button onclick="switchTab('sql')"       id="tabBtn-sql"       class="tab-btn">SQL Studio</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6">
+
+        <!-- ============ TAB: POS ============ -->
+        <section id="tab-pos" class="tab-content">
+            <div class="grid lg:grid-cols-3 gap-6">
+
+                <!-- Left: menu browser -->
+                <div class="lg:col-span-2">
+                    <input id="posSearch" type="text" placeholder="Search dishes..."
+                           oninput="renderMenu()"
+                           class="w-full border border-slate-300 rounded-lg px-4 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    <div id="categoryPills" class="flex flex-wrap gap-2 mb-4"></div>
+                    <div id="menuGrid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+                </div>
+
+                <!-- Right: cart -->
+                <aside class="bg-white rounded-xl shadow p-4 h-fit lg:sticky lg:top-4">
+                    <h2 class="font-bold text-lg mb-3">Current Order</h2>
+
+                    <label class="text-sm font-semibold text-slate-600">Customer</label>
+                    <select id="customerSelect"
+                            class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-4"></select>
+
+                    <div id="cartItems" class="space-y-2 mb-4"></div>
+
+                    <div class="border-t pt-3 text-sm space-y-1">
+                        <div class="flex justify-between"><span>Subtotal</span><span id="cartSubtotal">₹0.00</span></div>
+                        <div class="flex justify-between"><span>GST (5%)</span><span id="cartTax">₹0.00</span></div>
+                        <div class="flex justify-between font-bold text-base">
+                            <span>Total</span><span id="cartTotal">₹0.00</span>
+                        </div>
+                    </div>
+
+                    <button onclick="submitOrder()"
+                            class="w-full mt-4 bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 rounded-lg">
+                        Place Order
+                    </button>
+                    <button onclick="clearCart()"
+                            class="w-full mt-2 border border-slate-300 hover:bg-slate-100 py-2 rounded-lg text-sm">
+                        Clear Cart
+                    </button>
+                </aside>
+            </div>
+        </section>
+
+        <!-- ============ TAB: ORDERS (Phase 6) ============ -->
+        <section id="tab-orders" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">Order History</h2>
+                <button onclick="loadOrders()"
+                        class="border border-slate-300 hover:bg-slate-100 px-4 py-2 rounded-lg text-sm">
+                    ↻ Refresh
+                </button>
+            </div>
+            <div class="bg-white rounded-xl shadow overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-100 text-left text-xs uppercase text-slate-600">
+                        <tr>
+                            <th class="p-3">Order</th>
+                            <th class="p-3">Customer</th>
+                            <th class="p-3">Date</th>
+                            <th class="p-3 text-center">Items</th>
+                            <th class="p-3 text-right">Total</th>
+                            <th class="p-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ============ TAB: MENU (Phase 6) ============ -->
+        <section id="tab-menu" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">Menu Management</h2>
+                <button onclick="openMenuModal()"
+                        class="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-4 py-2 rounded-lg text-sm">
+                    + Add Dish
+                </button>
+            </div>
+            <div class="bg-white rounded-xl shadow overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-100 text-left text-xs uppercase text-slate-600">
+                        <tr>
+                            <th class="p-3">ID</th>
+                            <th class="p-3">Dish</th>
+                            <th class="p-3">Category</th>
+                            <th class="p-3 text-right">Price</th>
+                            <th class="p-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="menuTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ============ TAB: CUSTOMERS (Phase 6) ============ -->
+        <section id="tab-customers" class="tab-content hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h2 class="text-xl font-bold">Customers</h2>
+                <div class="flex gap-2">
+                    <input id="customerSearch" type="text" placeholder="Search customers..."
+                           oninput="renderCustomersTable()"
+                           class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    <button onclick="openCustomerModal()"
+                            class="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-4 py-2 rounded-lg text-sm">
+                        + Add Customer
+                    </button>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-100 text-left text-xs uppercase text-slate-600">
+                        <tr>
+                            <th class="p-3">ID</th>
+                            <th class="p-3">Name</th>
+                            <th class="p-3">Phone</th>
+                            <th class="p-3">Email</th>
+                            <th class="p-3 text-center">Orders</th>
+                            <th class="p-3 text-right">Total Spent</th>
+                            <th class="p-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ============ TAB: ANALYTICS (Phase 7) ============ -->
+        <section id="tab-analytics" class="tab-content hidden">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold">Sales Analytics</h2>
+                <button onclick="loadAnalytics()"
+                        class="border border-slate-300 hover:bg-slate-100 px-4 py-2 rounded-lg text-sm">
+                    ↻ Refresh
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-xl shadow p-4">
+                    <p class="text-xs uppercase text-slate-500 font-semibold">Total Revenue</p>
+                    <p id="kpiRevenue" class="text-2xl font-bold mt-1 text-orange-600">₹0.00</p>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4">
+                    <p class="text-xs uppercase text-slate-500 font-semibold">Orders Placed</p>
+                    <p id="kpiOrders" class="text-2xl font-bold mt-1">0</p>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4">
+                    <p class="text-xs uppercase text-slate-500 font-semibold">Registered Diners</p>
+                    <p id="kpiCustomers" class="text-2xl font-bold mt-1">0</p>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4">
+                    <p class="text-xs uppercase text-slate-500 font-semibold">Menu Items</p>
+                    <p id="kpiMenu" class="text-2xl font-bold mt-1">0</p>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow p-4">
+                    <h3 class="font-bold mb-3">Top 5 Best-Selling Dishes</h3>
+                    <div id="topItems"></div>
+                </div>
+                <div class="bg-white rounded-xl shadow p-4">
+                    <h3 class="font-bold mb-3">Sales by Category</h3>
+                    <div id="categorySales"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ TAB: SQL STUDIO (Phase 7) ============ -->
+        <section id="tab-sql" class="tab-content hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h2 class="text-xl font-bold">SQL Query Studio</h2>
+                <button onclick="resetDatabase()"
+                        class="border border-red-300 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg text-sm font-semibold">
+                    ⚠ Reset Database
+                </button>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-4 mb-4">
+                <p class="text-xs text-slate-500 mb-2">Quick queries:</p>
+                <div class="flex flex-wrap gap-2 mb-3">
+                    <button onclick="setSqlQuery('customer')"  class="pill">CUSTOMER</button>
+                    <button onclick="setSqlQuery('menu')"      class="pill">MENU</button>
+                    <button onclick="setSqlQuery('orders')"    class="pill">ORDERS</button>
+                    <button onclick="setSqlQuery('details')"   class="pill">ORDER_DETAILS</button>
+                    <button onclick="setSqlQuery('join')"      class="pill">4-Table JOIN</button>
+                </div>
+
+                <textarea id="sqlInput" rows="6" spellcheck="false"
+                          class="w-full font-mono text-sm border border-slate-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          placeholder="SELECT * FROM MENU;"></textarea>
+
+                <div class="flex items-center gap-3 mt-3">
+                    <button onclick="executeSqlQuery()"
+                            class="bg-orange-600 hover:bg-orange-700 text-white font-semibold px-5 py-2 rounded-lg">
+                        ▶ Run Query
+                    </button>
+                    <span id="sqlStatus" class="text-sm text-slate-500">Tip: press Ctrl+Enter to run.</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead id="sqlHead" class="bg-slate-100 text-left text-xs uppercase text-slate-600"></thead>
+                    <tbody id="sqlBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+        <!-- ============ MODAL: RECEIPT ============ -->
+    <div id="receiptModal" class="hidden fixed inset-0 bg-black/50 items-center justify-center z-50 p-4">
+        <div class="bg-slate-100 rounded-xl p-4 max-h-full overflow-y-auto">
+            <div id="printableReceipt" class="receipt-paper p-6 w-80 mx-auto"></div>
+            <div class="no-print flex gap-2 mt-4">
+                <button onclick="window.print()"
+                        class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 rounded-lg">
+                    🖨 Print
+                </button>
+                <button onclick="closeModal('receiptModal')"
+                        class="flex-1 border border-slate-300 bg-white hover:bg-slate-50 py-2 rounded-lg">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ MODAL: MENU ITEM ============ -->
+    <div id="menuModal" class="hidden fixed inset-0 bg-black/50 items-center justify-center z-50 p-4">
+        <form onsubmit="saveMenuItem(event)" class="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 id="menuModalTitle" class="text-lg font-bold mb-4">Add Dish</h3>
+            <input type="hidden" id="menuItemId">
+
+            <label class="text-sm font-semibold text-slate-600">Dish name</label>
+            <input id="menuName" required class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-3">
+
+            <label class="text-sm font-semibold text-slate-600">Category</label>
+            <input id="menuCategory" list="categoryList" required
+                   class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-3">
+            <datalist id="categoryList"></datalist>
+
+            <label class="text-sm font-semibold text-slate-600">Price (₹)</label>
+            <input id="menuPrice" type="number" min="0" step="0.01" required
+                   class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-5">
+
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 rounded-lg">Save</button>
+                <button type="button" onclick="closeModal('menuModal')" class="flex-1 border border-slate-300 hover:bg-slate-50 py-2 rounded-lg">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ============ MODAL: CUSTOMER ============ -->
+    <div id="customerModal" class="hidden fixed inset-0 bg-black/50 items-center justify-center z-50 p-4">
+        <form onsubmit="saveCustomer(event)" class="bg-white rounded-xl p-6 w-full max-w-md">
+            <h3 id="customerModalTitle" class="text-lg font-bold mb-4">Add Customer</h3>
+            <input type="hidden" id="customerId">
+
+            <label class="text-sm font-semibold text-slate-600">Name</label>
+            <input id="customerName" required class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-3">
+
+            <label class="text-sm font-semibold text-slate-600">Phone</label>
+            <input id="customerPhone" required class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-3">
+
+            <label class="text-sm font-semibold text-slate-600">Email (optional)</label>
+            <input id="customerEmail" type="email" class="w-full border border-slate-300 rounded-lg px-3 py-2 mb-5">
+
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 rounded-lg">Save</button>
+                <button type="button" onclick="closeModal('customerModal')" class="flex-1 border border-slate-300 hover:bg-slate-50 py-2 rounded-lg">Cancel</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Toast notifications appear here -->
+    <div id="toastContainer"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

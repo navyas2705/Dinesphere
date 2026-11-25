@@ -1,0 +1,81 @@
+body {
+    font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
+    margin: 0;
+}
+
+/* Tab buttons in the header */
+.tab-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #cbd5e1;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.tab-btn:hover  { background: #1e293b; color: white; }
+.tab-btn.active { background: #ea580c; color: white; }
+
+/* Category pills in the POS */
+.pill {
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #cbd5e1;
+    background: white;
+    cursor: pointer;
+}
+.pill:hover  { border-color: #f97316; }
+.pill.active { background: #f97316; color: white; border-color: #f97316; }
+
+/* Dish cards */
+.dish-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.dish-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Toast notifications */
+#toastContainer {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Receipt paper */
+.receipt-paper {
+    background: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    border-top: 5px solid #f97316;
+}
+
+/* When printing: show only the receipt */
+@media print {
+    body * { visibility: hidden; }
+    #printableReceipt, #printableReceipt * { visibility: visible; }
+    #printableReceipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: none;
+    }
+    .no-print { display: none !important; }
+}
