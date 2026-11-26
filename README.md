@@ -17,7 +17,11 @@ CUSTOMER 1:M ORDERS 1:M ORDER_DETAILS M:1 MENU
 The schema is in Third Normal Form (3NF).
 
 ## Tech Stack
-Python, Flask, SQLite, HTML, Tailwind CSS, JavaScript
+
+- **Backend:** Python, Flask
+- **Database:** SQLite (live app), with a MySQL script provided for the same schema
+- **Frontend:** HTML, Tailwind CSS, Vanilla JavaScript
+- **Tools:** VS Code, Git and GitHub
 
 ## How to Run
 1. Install Python 3.8 or newer.
