@@ -2,6 +2,8 @@
 
 A full-stack restaurant management web app built with Flask and SQLite.
 
+![Dashboard](screenshots/dinesphere_img.png)
+
 ## Features
 - Point of Sale (POS) with live cart and 5% GST
 - Order history with printable receipts
